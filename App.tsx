@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pressable, View } from "react-native";
+import { Pressable, ToastAndroid, View } from "react-native";
 import {
   Appbar,
   Button,
@@ -14,7 +14,17 @@ export default function App() {
   const [text1Checked, setText1Checked] = useState(true);
   const [text2Checked, setText2Checked] = useState(false);
 
-  console.log(text, text1Checked, text2Checked);
+  const addEntry = async () => {
+    const data = {
+      weight: text,
+      [process.env.EXPO_PUBLIC_TEXT_1]: text1Checked,
+      [process.env.EXPO_PUBLIC_TEXT_2]: text2Checked,
+    };
+
+    if (!process.env.EXPO_PUBLIC_API_ENDPOINT) {
+      ToastAndroid.show("Public Endpoint not Set", ToastAndroid.SHORT);
+    }
+  };
 
   return (
     <PaperProvider>
@@ -91,11 +101,12 @@ export default function App() {
         <Button
           icon="plus-circle-outline"
           mode="contained"
-          onPress={() => console.log(text)}
+          onPress={addEntry}
           style={{
             marginTop: 10,
             width: "100%",
           }}
+          disabled={text === "" ? true : false}
         >
           Add Entry
         </Button>
