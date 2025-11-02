@@ -1,0 +1,141 @@
+import { useState } from "react";
+import { Pressable, ToastAndroid, View } from "react-native";
+import {
+  Appbar,
+  Button,
+  Checkbox,
+  PaperProvider,
+  Text,
+  TextInput,
+} from "react-native-paper";
+
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+type Props = NativeStackScreenProps<any>;
+
+export default function HomeScreen({ navigation }: Props) {
+  const [text, setText] = useState("");
+  const [text1Checked, setText1Checked] = useState(true);
+  const [text2Checked, setText2Checked] = useState(false);
+
+  const addEntry = async () => {
+    if (!process.env.EXPO_PUBLIC_API_ENDPOINT) {
+      ToastAndroid.show("Public Endpoint not Set", ToastAndroid.SHORT);
+      return;
+    }
+
+    const date = new Date();
+
+    const data = {
+      weight: text,
+      [process.env.EXPO_PUBLIC_TEXT_1]: text1Checked,
+      [process.env.EXPO_PUBLIC_TEXT_2]: text2Checked,
+    };
+
+    setText("");
+
+    await fetch(process.env.EXPO_PUBLIC_API_ENDPOINT + date + ".json", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: JSON.stringify(data),
+    });
+  };
+
+  return (
+    <PaperProvider>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: "#fff",
+          alignItems: "center",
+          padding: 20,
+          paddingTop: 150,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            marginBottom: 20,
+            fontFamily: "Bitcount",
+          }}
+        >
+          Welcome! Log Your Weight
+        </Text>
+
+        <TextInput
+          label="Enter your weight"
+          value={text}
+          onChangeText={(text) => setText(text)}
+          mode="outlined"
+          numberOfLines={1}
+          keyboardType="numeric"
+          style={{
+            width: "100%",
+          }}
+        />
+
+        <View style={{ flexDirection: "row" }}>
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginVertical: 12,
+            }}
+            onPress={() => {
+              setText1Checked(!text1Checked);
+            }}
+          >
+            <Checkbox
+              status={text1Checked ? "checked" : "unchecked"}
+              onPress={() => {
+                setText1Checked(!text1Checked);
+              }}
+            />
+            <Text>{process.env.EXPO_PUBLIC_TEXT_1}</Text>
+          </Pressable>
+
+          <Pressable
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginVertical: 12,
+            }}
+            onPress={() => {
+              setText2Checked(!text2Checked);
+            }}
+          >
+            <Checkbox status={text2Checked ? "checked" : "unchecked"} />
+            <Text>{process.env.EXPO_PUBLIC_TEXT_2}</Text>
+          </Pressable>
+        </View>
+
+        <Button
+          icon="plus-circle-outline"
+          mode="contained"
+          onPress={addEntry}
+          style={{
+            marginTop: 10,
+            width: "100%",
+          }}
+          disabled={text === "" ? true : false}
+        >
+          Add Entry
+        </Button>
+        <Button
+          icon="chart-line"
+          mode="contained"
+          onPress={() => navigation.navigate("Report")}
+          style={{
+            marginTop: 10,
+            width: "100%",
+            backgroundColor: "#4b3f72",
+          }}
+        >
+          View Full report
+        </Button>
+      </View>
+    </PaperProvider>
+  );
+}
