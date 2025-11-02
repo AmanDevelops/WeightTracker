@@ -15,15 +15,28 @@ export default function App() {
   const [text2Checked, setText2Checked] = useState(false);
 
   const addEntry = async () => {
+    if (!process.env.EXPO_PUBLIC_API_ENDPOINT) {
+      ToastAndroid.show("Public Endpoint not Set", ToastAndroid.SHORT);
+      return;
+    }
+
+    const date = new Date();
+
     const data = {
       weight: text,
       [process.env.EXPO_PUBLIC_TEXT_1]: text1Checked,
       [process.env.EXPO_PUBLIC_TEXT_2]: text2Checked,
     };
 
-    if (!process.env.EXPO_PUBLIC_API_ENDPOINT) {
-      ToastAndroid.show("Public Endpoint not Set", ToastAndroid.SHORT);
-    }
+    setText("");
+
+    await fetch(process.env.EXPO_PUBLIC_API_ENDPOINT + date + ".json", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: JSON.stringify(data),
+    });
   };
 
   return (
